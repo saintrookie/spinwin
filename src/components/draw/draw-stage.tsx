@@ -5,12 +5,12 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useDraw } from "@/context/draw-context";
 import { playSound } from "@/lib/sound";
 import { fireWinnerConfetti } from "@/lib/confetti";
-import { Car, Sparkles } from "lucide-react";
+import { Gift, Sparkles } from "lucide-react";
 import type { RollCandidate } from "@/types/domain";
 import { cn } from "@/lib/utils";
 import { maskFullName } from "@/lib/mask-name";
 
-type Display = { name: string; plateNumber: string | null };
+type Display = { key: string; name: string; plateNumber: string | null };
 
 function randomCandidate(pool: RollCandidate[]): RollCandidate | null {
   if (pool.length === 0) return null;
@@ -23,6 +23,7 @@ export function DrawStage() {
   const [rollingDisplay, setRollingDisplay] = useState<Display | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const confettiFiredForRef = useRef<string | null>(null);
+  const tickCounterRef = useRef(0);
 
   const rollSpeedMs = settings?.rollSpeedMs ?? 60;
   const rollDurationMs = settings?.rollDurationMs ?? 4000;
@@ -39,7 +40,12 @@ export function DrawStage() {
       const tick = () => {
         const candidate = randomCandidate(rollPool);
         if (candidate) {
-          setRollingDisplay({ name: maskFullName(candidate.fullName), plateNumber: candidate.plateNumber });
+          tickCounterRef.current += 1;
+          setRollingDisplay({
+            key: `tick-${tickCounterRef.current}`,
+            name: maskFullName(candidate.fullName),
+            plateNumber: candidate.plateNumber,
+          });
           if (soundEnabled) playSound("tick");
         }
         timeoutRef.current = setTimeout(tick, rollSpeedMs);
@@ -55,7 +61,12 @@ export function DrawStage() {
         const elapsed = Date.now() - startedAt;
         const candidate = randomCandidate(rollPool);
         if (candidate) {
-          setRollingDisplay({ name: maskFullName(candidate.fullName), plateNumber: candidate.plateNumber });
+          tickCounterRef.current += 1;
+          setRollingDisplay({
+            key: `tick-${tickCounterRef.current}`,
+            name: maskFullName(candidate.fullName),
+            plateNumber: candidate.plateNumber,
+          });
           if (soundEnabled) playSound("tick");
         }
         if (elapsed >= rollDurationMs) return;
@@ -88,7 +99,7 @@ export function DrawStage() {
   const reduceMotion = useReducedMotion();
 
   const display: Display | null = isRevealed && lastWinner
-    ? { name: maskFullName(lastWinner.fullName), plateNumber: lastWinner.plateNumber }
+    ? { key: lastWinner.winnerId, name: maskFullName(lastWinner.fullName), plateNumber: lastWinner.plateNumber }
     : isRolling
       ? rollingDisplay
       : null;
@@ -113,7 +124,7 @@ export function DrawStage() {
 
         <AnimatePresence mode="wait">
           <motion.div
-            key={display?.plateNumber ?? "empty"}
+            key={display?.key ?? "empty"}
             initial={reduceMotion ? false : { opacity: 0, y: isRolling ? 8 : 24, scale: isRevealed ? 0.9 : 1 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: isRolling ? -8 : -12 }}
@@ -124,8 +135,8 @@ export function DrawStage() {
               isRevealed && "text-primary"
             )}
           >
-            <Car className="size-[0.6em] shrink-0" />
-            {display?.plateNumber ?? "—"}
+            {!isRolling && <Gift className="size-[0.6em] shrink-0" />}
+            {display?.plateNumber ?? ""}
           </motion.div>
         </AnimatePresence>
 
