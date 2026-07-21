@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  SkipForward,
   Upload,
   Maximize,
   Minimize,
@@ -25,8 +24,8 @@ import { StatsPanelDialog } from "@/components/draw/stats-panel-dialog";
 import { ResetButton } from "@/components/draw/reset-button";
 
 export function ControlsBar() {
-  const { state, startDraw, stopDraw, nextPrize, refreshAll } = useDraw();
-  const { status, currentPrize } = state;
+  const { state, currentPrize, startDraw, stopDraw, refreshAll } = useDraw();
+  const { status } = state;
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -49,9 +48,6 @@ export function ControlsBar() {
       space: () => {
         if (isRolling) void stopDraw();
         else if (canStart && currentPrize) startDraw();
-      },
-      n: () => {
-        if (!isRolling) void nextPrize();
       },
       f: toggleFullscreen,
       u: () => setUploadOpen(true),
@@ -84,10 +80,6 @@ export function ControlsBar() {
           <div className="flex flex-wrap items-center justify-center gap-2">
             <Button variant="secondary" onClick={() => setUploadOpen(true)}>
               <Upload /> Upload Excel
-            </Button>
-
-            <Button variant="secondary" onClick={nextPrize} disabled={isRolling}>
-              <SkipForward /> Next Prize
             </Button>
 
             <WinnerHistoryDialog />

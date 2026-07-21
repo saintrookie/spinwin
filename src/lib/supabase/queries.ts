@@ -1,6 +1,7 @@
 import "server-only";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { Database } from "@/types/supabase";
+import { selectCurrentPrize } from "@/lib/select-current-prize";
 import type {
   DrawSettings,
   DrawStats,
@@ -144,7 +145,7 @@ export async function updateSettings(
 
 export async function getStats(): Promise<DrawStats> {
   const admin = supabaseAdmin();
-  const [{ count: total }, { count: remaining }, { count: winners }, settings] =
+  const [{ count: total }, { count: remaining }, { count: winners }, prizes] =
     await Promise.all([
       admin.from("participants").select("*", { count: "exact", head: true }),
       admin
@@ -152,24 +153,14 @@ export async function getStats(): Promise<DrawStats> {
         .select("*", { count: "exact", head: true })
         .eq("has_won", false),
       admin.from("winners").select("*", { count: "exact", head: true }),
-      getSettings(),
+      listPrizes(),
     ]);
-
-  let currentPrize: Prize | null = null;
-  if (settings.currentPrizeId) {
-    const { data } = await admin
-      .from("prizes")
-      .select("*")
-      .eq("id", settings.currentPrizeId)
-      .maybeSingle();
-    if (data) currentPrize = mapPrize(data);
-  }
 
   return {
     total: total ?? 0,
     remaining: remaining ?? 0,
     winners: winners ?? 0,
-    currentPrize,
+    currentPrize: selectCurrentPrize(prizes),
   };
 }
 
@@ -223,20 +214,6 @@ export async function getRollPool(size: number): Promise<RollCandidate[]> {
     fullName: row.full_name,
     plateNumber: row.plate_number,
   }));
-}
-
-export async function advancePrize(): Promise<Prize | null> {
-  const prizes = await listPrizes();
-  const active = prizes.filter((p) => p.isActive);
-  if (active.length === 0) {
-    await updateSettings({ currentPrizeId: null });
-    return null;
-  }
-  const settings = await getSettings();
-  const currentIndex = active.findIndex((p) => p.id === settings.currentPrizeId);
-  const next = active[(currentIndex + 1) % active.length];
-  await updateSettings({ currentPrizeId: next.id });
-  return next;
 }
 
 export async function deleteAllParticipants(): Promise<void> {

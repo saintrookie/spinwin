@@ -8,9 +8,8 @@ import { fireWinnerConfetti } from "@/lib/confetti";
 import { Gift, Sparkles } from "lucide-react";
 import type { RollCandidate } from "@/types/domain";
 import { cn } from "@/lib/utils";
-import { maskFullName } from "@/lib/mask-name";
 
-type Display = { key: string; name: string; plateNumber: string | null };
+type Display = { key: string; plateNumber: string | null };
 
 function randomCandidate(pool: RollCandidate[]): RollCandidate | null {
   if (pool.length === 0) return null;
@@ -41,11 +40,7 @@ export function DrawStage() {
         const candidate = randomCandidate(rollPool);
         if (candidate) {
           tickCounterRef.current += 1;
-          setRollingDisplay({
-            key: `tick-${tickCounterRef.current}`,
-            name: maskFullName(candidate.fullName),
-            plateNumber: candidate.plateNumber,
-          });
+          setRollingDisplay({ key: `tick-${tickCounterRef.current}`, plateNumber: candidate.plateNumber });
           if (soundEnabled) playSound("tick");
         }
         timeoutRef.current = setTimeout(tick, rollSpeedMs);
@@ -62,15 +57,16 @@ export function DrawStage() {
         const candidate = randomCandidate(rollPool);
         if (candidate) {
           tickCounterRef.current += 1;
-          setRollingDisplay({
-            key: `tick-${tickCounterRef.current}`,
-            name: maskFullName(candidate.fullName),
-            plateNumber: candidate.plateNumber,
-          });
+          setRollingDisplay({ key: `tick-${tickCounterRef.current}`, plateNumber: candidate.plateNumber });
           if (soundEnabled) playSound("tick");
         }
-        if (elapsed >= rollDurationMs) return;
-        delay = Math.min(delay * 1.14, 420);
+        // Keep ticking (at the capped slow speed) even past rollDurationMs —
+        // if the server response is slower than expected, we'd otherwise
+        // freeze on the last candidate instead of animating right up to the
+        // real reveal. The effect cleanup cancels this once status changes.
+        if (elapsed < rollDurationMs) {
+          delay = Math.min(delay * 1.14, 420);
+        }
         timeoutRef.current = setTimeout(tick, delay);
       };
       tick();
@@ -99,26 +95,24 @@ export function DrawStage() {
   const reduceMotion = useReducedMotion();
 
   const display: Display | null = isRevealed && lastWinner
-    ? { key: lastWinner.winnerId, name: maskFullName(lastWinner.fullName), plateNumber: lastWinner.plateNumber }
+    ? { key: lastWinner.winnerId, plateNumber: lastWinner.plateNumber }
     : isRolling
       ? rollingDisplay
       : null;
 
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center px-6">
+    <div className="relative flex flex-1 flex-col items-center justify-center px-4 sm:px-6">
       <p className="sr-only" role="status" aria-live="polite">
-        {isRevealed && lastWinner
-          ? `Winner: ${maskFullName(lastWinner.fullName)}${lastWinner.plateNumber ? `, plate ${lastWinner.plateNumber}` : ""}`
-          : ""}
+        {isRevealed && lastWinner && lastWinner.plateNumber ? `Winner plate: ${lastWinner.plateNumber}` : ""}
       </p>
       <div
         className={cn(
-          "retro-card flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-8 py-16 text-center transition-transform duration-300",
+          "retro-card flex w-full max-w-5xl flex-1 flex-col items-center justify-center px-4 py-10 text-center transition-transform duration-300 sm:px-8 sm:py-16",
           isRevealed && "-rotate-1 scale-[1.02] border-primary"
         )}
       >
-        <div className="mb-8 flex items-center justify-center gap-2 text-base font-bold uppercase tracking-[0.3em] text-muted-foreground">
-          <Sparkles className="size-5" />
+        <div className="mb-4 flex items-center justify-center gap-2 text-sm font-bold uppercase tracking-[0.3em] text-muted-foreground sm:mb-8 sm:text-base">
+          <Sparkles className="size-4 sm:size-5" />
           {isRevealed ? "Pemenang" : isRolling ? "Pengundian Berjalan..." : "Ready"}
         </div>
 
@@ -130,8 +124,8 @@ export function DrawStage() {
             exit={reduceMotion ? undefined : { opacity: 0, y: isRolling ? -8 : -12 }}
             transition={{ duration: reduceMotion ? 0 : isRolling ? 0.05 : 0.4, ease: "easeOut" }}
             className={cn(
-              "flex items-center justify-center gap-4 font-mono font-extrabold leading-tight tracking-widest text-foreground",
-              "text-[clamp(3rem,9vw,8rem)]",
+              "flex items-center justify-center gap-3 font-mono font-extrabold leading-tight tracking-widest text-foreground sm:gap-4",
+              "text-[clamp(2.25rem,11vw,8rem)]",
               isRevealed && "text-primary"
             )}
           >
@@ -139,14 +133,6 @@ export function DrawStage() {
             {display?.plateNumber ?? ""}
           </motion.div>
         </AnimatePresence>
-
-        {display?.name && (
-          <div className="mt-8 flex items-center justify-center">
-            <span className="rounded-lg border-2 border-foreground bg-secondary px-5 py-2 font-bold tracking-wide text-secondary-foreground text-[clamp(1.125rem,2.2vw,1.75rem)]">
-              {display.name}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );

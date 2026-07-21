@@ -16,7 +16,6 @@ export const PARTICIPANT_TEMPLATE_HEADERS = [
 
 export const KEYBOARD_SHORTCUTS = {
   startStop: "Space",
-  nextPrize: "n",
   fullscreen: "f",
   upload: "u",
   toggleTheme: "d",

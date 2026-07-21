@@ -47,6 +47,5 @@ export const api = {
       body: JSON.stringify({ prizeId, count }),
     }),
   resetDraw: () => request<{ ok: true }>("/api/draw/reset", { method: "POST" }),
-  advancePrize: () => request<Prize | null>("/api/draw/advance-prize", { method: "POST" }),
   getHistory: (limit = 20) => request<Winner[]>(`/api/draw/history?limit=${limit}`),
 };

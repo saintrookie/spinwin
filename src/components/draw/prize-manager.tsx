@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Star } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,8 +11,8 @@ import { useDraw } from "@/context/draw-context";
 import { api } from "@/lib/api-client";
 
 export function PrizeManager() {
-  const { state, refreshAll } = useDraw();
-  const { prizes, currentPrize } = state;
+  const { state, currentPrize, refreshAll } = useDraw();
+  const { prizes } = state;
 
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
@@ -51,15 +51,6 @@ export function PrizeManager() {
       await refreshAll();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not delete prize");
-    }
-  }
-
-  async function handleSetCurrent(id: string) {
-    try {
-      await api.updateSettings({ currentPrizeId: id });
-      await refreshAll();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not select prize");
     }
   }
 
@@ -115,15 +106,6 @@ export function PrizeManager() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleSetCurrent(prize.id)}
-                aria-label="Set as current prize"
-                title="Set as current prize"
-              >
-                <Star className={currentPrize?.id === prize.id ? "fill-secondary text-secondary-foreground" : ""} />
-              </Button>
               <Button
                 variant="ghost"
                 size="icon"

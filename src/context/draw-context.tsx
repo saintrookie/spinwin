@@ -5,12 +5,14 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
 import { api } from "@/lib/api-client";
 import { ROLL_POOL_SIZE } from "@/lib/constants";
+import { selectCurrentPrize } from "@/lib/select-current-prize";
 import type {
   DrawSettings,
   DrawStats,
@@ -26,7 +28,6 @@ type DrawState = {
   status: DrawStatus;
   isStopping: boolean;
   prizes: Prize[];
-  currentPrize: Prize | null;
   stats: DrawStats | null;
   settings: DrawSettings | null;
   history: Winner[];
@@ -40,7 +41,6 @@ type Action =
   | { type: "SET_STATUS"; status: DrawStatus }
   | { type: "SET_STOPPING"; isStopping: boolean }
   | { type: "SET_PRIZES"; prizes: Prize[] }
-  | { type: "SET_CURRENT_PRIZE"; prize: Prize | null }
   | { type: "SET_STATS"; stats: DrawStats }
   | { type: "SET_SETTINGS"; settings: DrawSettings }
   | { type: "SET_HISTORY"; history: Winner[] }
@@ -51,7 +51,6 @@ const initialState: DrawState = {
   status: "idle",
   isStopping: false,
   prizes: [],
-  currentPrize: null,
   stats: null,
   settings: null,
   history: [],
@@ -70,8 +69,6 @@ function reducer(state: DrawState, action: Action): DrawState {
       return { ...state, isStopping: action.isStopping };
     case "SET_PRIZES":
       return { ...state, prizes: action.prizes };
-    case "SET_CURRENT_PRIZE":
-      return { ...state, currentPrize: action.prize };
     case "SET_STATS":
       return { ...state, stats: action.stats };
     case "SET_SETTINGS":
@@ -89,9 +86,9 @@ function reducer(state: DrawState, action: Action): DrawState {
 
 type DrawContextValue = {
   state: DrawState;
+  currentPrize: Prize | null;
   startDraw: () => void;
   stopDraw: () => Promise<void>;
-  nextPrize: () => Promise<void>;
   resetDraw: () => Promise<void>;
   refreshAll: () => Promise<void>;
   updateSettings: (patch: Partial<DrawSettings>) => Promise<void>;
@@ -102,6 +99,7 @@ const DrawContext = createContext<DrawContextValue | null>(null);
 
 export function DrawProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const currentPrize = useMemo(() => selectCurrentPrize(state.prizes), [state.prizes]);
 
   const refreshStats = useCallback(async () => {
     const stats = await api.getStats();
@@ -125,11 +123,7 @@ export function DrawProvider({ children }: { children: ReactNode }) {
   const refreshPrizes = useCallback(async () => {
     const prizes = await api.listPrizes();
     dispatch({ type: "SET_PRIZES", prizes });
-    dispatch({
-      type: "SET_CURRENT_PRIZE",
-      prize: prizes.find((p) => p.id === state.settings?.currentPrizeId) ?? null,
-    });
-  }, [state.settings?.currentPrizeId]);
+  }, []);
 
   const refreshAll = useCallback(async () => {
     const [prizes, stats, settings, history] = await Promise.all([
@@ -142,8 +136,6 @@ export function DrawProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_STATS", stats });
     dispatch({ type: "SET_SETTINGS", settings });
     dispatch({ type: "SET_HISTORY", history });
-    const current = prizes.find((p) => p.id === settings.currentPrizeId) ?? null;
-    dispatch({ type: "SET_CURRENT_PRIZE", prize: current });
     await refreshRollPool();
   }, [refreshRollPool]);
 
@@ -157,12 +149,8 @@ export function DrawProvider({ children }: { children: ReactNode }) {
   }, [refreshAll]);
 
   const startDraw = useCallback(() => {
-    if (!state.currentPrize) {
-      toast.error("Select a prize before starting the draw");
-      return;
-    }
-    if (state.currentPrize.awardedCount >= state.currentPrize.quantity) {
-      toast.error("All winners for this prize have already been drawn");
+    if (!currentPrize) {
+      toast.error("No prize available to draw");
       return;
     }
     if (state.stats && state.stats.remaining <= 0) {
@@ -172,15 +160,15 @@ export function DrawProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "SET_WINNER", winner: null });
     dispatch({ type: "SET_STOPPING", isStopping: false });
     dispatch({ type: "SET_STATUS", status: "rolling" });
-  }, [state.currentPrize, state.stats]);
+  }, [currentPrize, state.stats]);
 
   const stopDraw = useCallback(async () => {
-    if (state.status !== "rolling" || state.isStopping || !state.currentPrize) return;
+    if (state.status !== "rolling" || state.isStopping || !currentPrize) return;
     dispatch({ type: "SET_STOPPING", isStopping: true });
     const rollDurationMs = state.settings?.rollDurationMs ?? 4000;
     try {
       const [results] = await Promise.all([
-        api.spin(state.currentPrize.id, 1),
+        api.spin(currentPrize.id, 1),
         new Promise((resolve) => setTimeout(resolve, rollDurationMs)),
       ]);
       if (results.length === 0) {
@@ -198,23 +186,10 @@ export function DrawProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: "SET_STOPPING", isStopping: false });
     }
-  }, [state.status, state.isStopping, state.currentPrize, state.settings, refreshStats, refreshHistory, refreshRollPool, refreshPrizes]);
+  }, [state.status, state.isStopping, state.settings, currentPrize, refreshStats, refreshHistory, refreshRollPool, refreshPrizes]);
 
   const returnToIdle = useCallback(() => {
     dispatch({ type: "SET_STATUS", status: "idle" });
-  }, []);
-
-  const nextPrize = useCallback(async () => {
-    try {
-      const prize = await api.advancePrize();
-      dispatch({ type: "SET_CURRENT_PRIZE", prize });
-      dispatch({ type: "SET_STATUS", status: "idle" });
-      dispatch({ type: "SET_WINNER", winner: null });
-      const prizes = await api.listPrizes();
-      dispatch({ type: "SET_PRIZES", prizes });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not advance prize");
-    }
   }, []);
 
   const resetDraw = useCallback(async () => {
@@ -240,7 +215,7 @@ export function DrawProvider({ children }: { children: ReactNode }) {
 
   return (
     <DrawContext.Provider
-      value={{ state, startDraw, stopDraw, nextPrize, resetDraw, refreshAll, updateSettings, returnToIdle }}
+      value={{ state, currentPrize, startDraw, stopDraw, resetDraw, refreshAll, updateSettings, returnToIdle }}
     >
       {children}
     </DrawContext.Provider>

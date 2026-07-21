@@ -6,8 +6,8 @@ import { ResetButton } from "@/components/draw/reset-button";
 import { useDraw } from "@/context/draw-context";
 
 export function DrawActionButton() {
-  const { state, startDraw, stopDraw } = useDraw();
-  const { status, isStopping, currentPrize, prizes } = state;
+  const { state, currentPrize, startDraw, stopDraw } = useDraw();
+  const { status, isStopping, prizes } = state;
   const isRolling = status === "rolling";
   const canStart = status === "idle" || status === "celebrating";
 
@@ -17,8 +17,11 @@ export function DrawActionButton() {
 
   if (allPrizesComplete) {
     return (
-      <ResetButton variant="secondary" className="h-24 w-full max-w-xl text-3xl">
-        <RotateCcw className="size-9" /> Reset &amp; Run Again
+      <ResetButton
+        variant="secondary"
+        className="h-auto min-h-16 w-full max-w-xl whitespace-normal py-3 text-lg sm:min-h-24 sm:text-3xl"
+      >
+        <RotateCcw className="size-6 sm:size-9" /> Reset &amp; Run Again
       </ResetButton>
     );
   }
@@ -29,9 +32,9 @@ export function DrawActionButton() {
         variant="destructive"
         onClick={stopDraw}
         disabled={isStopping}
-        className="h-24 w-full max-w-xl text-3xl"
+        className="h-16 w-full max-w-xl text-lg sm:h-24 sm:text-3xl"
       >
-        <Square className="size-9" /> {isStopping ? "Berhenti..." : "Hentikan"}
+        <Square className="size-6 sm:size-9" /> {isStopping ? "Berhenti..." : "Hentikan"}
       </Button>
     );
   }
@@ -40,9 +43,9 @@ export function DrawActionButton() {
     <Button
       onClick={startDraw}
       disabled={!canStart || !currentPrize}
-      className="h-24 w-full max-w-xl text-3xl"
+      className="h-16 w-full max-w-xl text-lg sm:h-24 sm:text-3xl"
     >
-      <Play className="size-9" /> Kocok Bwaang
+      <Play className="size-6 sm:size-9" /> Mulai
     </Button>
   );
 }

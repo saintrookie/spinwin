@@ -5,11 +5,10 @@ import { useDraw } from "@/context/draw-context";
 import { Badge } from "@/components/ui/badge";
 
 export function PrizeBanner() {
-  const { state } = useDraw();
-  const { currentPrize } = state;
+  const { currentPrize } = useDraw();
 
   return (
-    <div className="retro-card-sm flex items-center justify-center gap-3 bg-secondary px-6 py-2.5 text-secondary-foreground">
+    <div className="retro-card-sm flex max-w-full flex-wrap items-center justify-center gap-2 bg-secondary px-4 py-2 text-secondary-foreground sm:gap-3 sm:px-6 sm:py-2.5">
       <Gift className="size-4" />
       {currentPrize ? (
         <>

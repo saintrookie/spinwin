@@ -130,7 +130,7 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
         }
       }}
     >
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl p-4 sm:p-6 max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Upload participants</DialogTitle>
           <DialogDescription>
@@ -138,17 +138,24 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
+        {/* Scrollable content area */}
+        <div className="flex flex-col gap-4 overflow-y-auto py-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Button
               variant="secondary"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="justify-center"
             >
-              <FileSpreadsheet /> Choose file
+              <FileSpreadsheet className="mr-2 size-4" /> Choose file
             </Button>
-            <Button variant="ghost" onClick={downloadParticipantTemplate} type="button">
-              <Download /> Download template
+            <Button
+              variant="ghost"
+              onClick={downloadParticipantTemplate}
+              type="button"
+              className="justify-center"
+            >
+              <Download className="mr-2 size-4" /> Download template
             </Button>
             <input
               ref={fileInputRef}
@@ -157,12 +164,16 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
               className="hidden"
               onChange={handleFileChange}
             />
-            {fileName && <span className="text-muted-foreground text-sm truncate">{fileName}</span>}
+            {fileName && (
+              <span className="text-muted-foreground text-sm truncate px-1">
+                {fileName}
+              </span>
+            )}
           </div>
 
           {parseResult && (
             <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-4 text-sm">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                 <span className="text-emerald-500 font-medium">{validCount} valid rows</span>
                 {errors.length > 0 && (
                   <span className="text-amber-500 font-medium flex items-center gap-1">
@@ -172,12 +183,12 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
               </div>
 
               {errors.length > 0 && (
-                <div className="max-h-48 overflow-auto rounded-lg border-2 border-foreground">
+                <div className="max-h-48 overflow-auto rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-16">Row</TableHead>
-                        <TableHead className="w-32">Field</TableHead>
+                        <TableHead className="w-24 sm:w-32">Field</TableHead>
                         <TableHead>Issue</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -186,7 +197,7 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
                         <TableRow key={i}>
                           <TableCell>{e.row}</TableCell>
                           <TableCell className="text-muted-foreground">{e.field ?? "-"}</TableCell>
-                          <TableCell>{e.message}</TableCell>
+                          <TableCell className="break-words">{e.message}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -207,7 +218,7 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
                   disabled={uploading}
                 />
                 <Label htmlFor="replace-existing" className="text-sm font-normal">
-                  Replace existing participant list (clears current data first)
+                  Replace existing data
                 </Label>
               </div>
 
@@ -216,12 +227,22 @@ export function UploadDialog({ open, onOpenChange, onImported }: Props) {
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={uploading}>
+        <DialogFooter className="mt-4 sm:mt-0">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            disabled={uploading}
+            className="w-full sm:w-auto"
+          >
             Cancel
           </Button>
-          <Button onClick={handleImport} disabled={!validCount || uploading}>
-            <Upload /> {uploading ? `Importing... ${progress}%` : `Import ${validCount || ""} participants`}
+          <Button
+            onClick={handleImport}
+            disabled={!validCount || uploading}
+            className="w-full sm:w-auto"
+          >
+            <Upload className="mr-2 size-4" />{" "}
+            {uploading ? `Importing... ${progress}%` : `Import ${validCount || ""} participants`}
           </Button>
         </DialogFooter>
       </DialogContent>
