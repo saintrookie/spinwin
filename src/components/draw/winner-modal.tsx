@@ -1,22 +1,20 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-// Removed unused ArrowRight import (or add it to a button if needed)
-import { PartyPopper, Car, X } from "lucide-react"; 
+import { PartyPopper, Car, ArrowRight, X } from "lucide-react";
 import { useDraw } from "@/context/draw-context";
 import { Button } from "@/components/ui/button";
 import { maskFullName } from "@/lib/mask-name";
 
 export function WinnerModal() {
-  const { state, returnToIdle } = useDraw();
-  const { status, lastWinner, currentPrize } = state;
+  const { state, currentPrize, returnToIdle } = useDraw();
+  const { status, lastWinner } = state;
   const open = (status === "revealing" || status === "celebrating") && Boolean(lastWinner);
 
   return (
     <AnimatePresence>
       {open && lastWinner && (
         <motion.div
-          key="winner-modal" // 👈 REQUIRED: AnimatePresence needs a key on conditional children
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -64,10 +62,8 @@ export function WinnerModal() {
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Button variant="secondary" onClick={returnToIdle}>
                 Continue
-                {/* If you intended to use ArrowRight, it would go here: 
-                    <ArrowRight className="ml-2 size-4" /> 
-                */}
               </Button>
+              
             </div>
           </motion.div>
         </motion.div>
