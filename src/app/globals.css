@@ -1,0 +1,157 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.55);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.3);
+  --radius-2xl: calc(var(--radius) * 1.6);
+  --radius-3xl: calc(var(--radius) * 2);
+  --radius-4xl: calc(var(--radius) * 2.4);
+}
+
+:root {
+  /* Retro / vintage: warm cream paper, coral & mustard accents, ink-black lines */
+  --background: #f6e6cd;
+  --foreground: #241a10;
+  --card: #fff8ea;
+  --card-foreground: #241a10;
+  --popover: #fff8ea;
+  --popover-foreground: #241a10;
+  --primary: #f1614e;
+  --primary-foreground: #fff8ea;
+  --secondary: #e9a63c;
+  --secondary-foreground: #241a10;
+  --muted: #ecdab3;
+  --muted-foreground: #6b5942;
+  --accent: #e9a63c;
+  --accent-foreground: #241a10;
+  --destructive: #b4402f;
+  --border: #241a10;
+  --input: #241a10;
+  --ring: #f1614e;
+  --chart-1: #f1614e;
+  --chart-2: #e9a63c;
+  --chart-3: #6b5942;
+  --chart-4: #b4402f;
+  --chart-5: #241a10;
+  --radius: 1.1rem;
+  --sidebar: #fff8ea;
+  --sidebar-foreground: #241a10;
+  --sidebar-primary: #f1614e;
+  --sidebar-primary-foreground: #fff8ea;
+  --sidebar-accent: #e9a63c;
+  --sidebar-accent-foreground: #241a10;
+  --sidebar-border: #241a10;
+  --sidebar-ring: #f1614e;
+
+  --retro-shadow-color: #241a10;
+}
+
+.dark {
+  /* Retro night poster: espresso paper, same coral & mustard, cream ink lines */
+  --background: #1e1710;
+  --foreground: #f5e6cc;
+  --card: #2a2016;
+  --card-foreground: #f5e6cc;
+  --popover: #2a2016;
+  --popover-foreground: #f5e6cc;
+  --primary: #f1614e;
+  --primary-foreground: #1e1710;
+  --secondary: #e9a63c;
+  --secondary-foreground: #1e1710;
+  --muted: #382b1d;
+  --muted-foreground: #c9b596;
+  --accent: #e9a63c;
+  --accent-foreground: #1e1710;
+  --destructive: #e5695a;
+  --border: #f5e6cc;
+  --input: #f5e6cc;
+  --ring: #f1614e;
+  --chart-1: #f1614e;
+  --chart-2: #e9a63c;
+  --chart-3: #c9b596;
+  --chart-4: #e5695a;
+  --chart-5: #f5e6cc;
+  --sidebar: #2a2016;
+  --sidebar-foreground: #f5e6cc;
+  --sidebar-primary: #f1614e;
+  --sidebar-primary-foreground: #1e1710;
+  --sidebar-accent: #e9a63c;
+  --sidebar-accent-foreground: #1e1710;
+  --sidebar-border: #f5e6cc;
+  --sidebar-ring: #f1614e;
+
+  --retro-shadow-color: #000000;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  /* Flat retro card: solid paper fill, thick ink border, hard offset shadow
+     (no blur) instead of glassmorphism/soft drop shadows. */
+  .retro-card {
+    @apply relative rounded-2xl border-[3px] border-foreground bg-card;
+    box-shadow: 5px 5px 0 0 var(--retro-shadow-color);
+  }
+
+  .retro-card-sm {
+    @apply relative rounded-xl border-2 border-foreground bg-card;
+    box-shadow: 3px 3px 0 0 var(--retro-shadow-color);
+  }
+
+  /* Subtle vintage paper texture: a faint dot grid */
+  .retro-dots {
+    background-image: radial-gradient(var(--foreground) 1px, transparent 1px);
+    background-size: 22px 22px;
+    opacity: 0.08;
+  }
+}
