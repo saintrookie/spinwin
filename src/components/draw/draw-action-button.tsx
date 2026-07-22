@@ -21,7 +21,7 @@ export function DrawActionButton() {
         variant="secondary"
         className="h-auto min-h-16 w-full max-w-xl whitespace-normal py-3 text-lg sm:min-h-24 sm:text-3xl"
       >
-        <RotateCcw className="size-6 sm:size-9" /> Reset &amp; Run Again
+        <RotateCcw data-icon="inline-start" className="size-6 sm:size-9" /> Reset &amp; Run Again
       </ResetButton>
     );
   }
@@ -34,7 +34,7 @@ export function DrawActionButton() {
         disabled={isStopping}
         className="h-16 w-full max-w-xl text-lg sm:h-24 sm:text-3xl"
       >
-        <Square className="size-6 sm:size-9" /> {isStopping ? "Berhenti..." : "Hentikan"}
+        <Square data-icon="inline-start" className="size-6 sm:size-9" /> {isStopping ? "Berhenti..." : "Hentikan"}
       </Button>
     );
   }
@@ -45,7 +45,7 @@ export function DrawActionButton() {
       disabled={!canStart || !currentPrize}
       className="h-16 w-full max-w-xl text-lg sm:h-24 sm:text-3xl"
     >
-      <Play className="size-6 sm:size-9" /> Mulai
+      <Play data-icon="inline-start" className="size-6 sm:size-9" /> Mulai
     </Button>
   );
 }

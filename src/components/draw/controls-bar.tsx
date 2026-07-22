@@ -92,7 +92,7 @@ export function ControlsBar() {
 
           <div className="flex flex-col gap-3">
             <Button variant="secondary" onClick={() => setUploadOpen(true)} className="w-full sm:w-auto sm:self-center">
-              <Upload /> Upload Excel
+              <Upload data-icon="inline-start" /> Upload Excel
             </Button>
 
             <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center">
