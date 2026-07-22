@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,19 @@ export function SettingsPanel({ open, onOpenChange }: Props) {
   const { state, updateSettings } = useDraw();
   const { settings } = state;
 
+  // Local copies so typing isn't fought by the round-trip PATCH request that
+  // fired on every keystroke (an in-flight save resolving after a later
+  // keystroke used to snap the field back to a stale value).
+  const [rollDuration, setRollDuration] = useState(settings?.rollDurationMs ?? 4000);
+  const [rollSpeed, setRollSpeed] = useState(settings?.rollSpeedMs ?? 60);
+
+  useEffect(() => {
+    if (settings) {
+      setRollDuration(settings.rollDurationMs);
+      setRollSpeed(settings.rollSpeedMs);
+    }
+  }, [settings]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -43,8 +57,16 @@ export function SettingsPanel({ open, onOpenChange }: Props) {
                 type="number"
                 min={500}
                 step={250}
-                value={settings?.rollDurationMs ?? 4000}
-                onChange={(e) => updateSettings({ rollDurationMs: Number(e.target.value) })}
+                value={rollDuration}
+                onChange={(e) => setRollDuration(Number(e.target.value))}
+                onBlur={() => {
+                  if (rollDuration !== settings?.rollDurationMs) {
+                    updateSettings({ rollDurationMs: rollDuration });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                }}
               />
               <p className="text-muted-foreground text-xs">
                 How long the reveal animation runs after Stop Draw is pressed.
@@ -58,8 +80,16 @@ export function SettingsPanel({ open, onOpenChange }: Props) {
                 type="number"
                 min={20}
                 step={10}
-                value={settings?.rollSpeedMs ?? 60}
-                onChange={(e) => updateSettings({ rollSpeedMs: Number(e.target.value) })}
+                value={rollSpeed}
+                onChange={(e) => setRollSpeed(Number(e.target.value))}
+                onBlur={() => {
+                  if (rollSpeed !== settings?.rollSpeedMs) {
+                    updateSettings({ rollSpeedMs: rollSpeed });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                }}
               />
               <p className="text-muted-foreground text-xs">
                 Lower is faster. Controls how quickly names cycle while rolling.

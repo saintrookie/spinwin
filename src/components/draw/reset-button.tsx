@@ -2,6 +2,7 @@
 
 import { useState, type ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,19 +19,32 @@ type Props = Omit<ComponentProps<typeof Button>, "onClick"> & {
   /** Controlled confirm-dialog state, e.g. to open it from a keyboard shortcut. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Shown as a hover tooltip — use for icon-only invocations that have no visible label. */
+  tooltip?: string;
 };
 
-export function ResetButton({ children, open: openProp, onOpenChange, ...buttonProps }: Props) {
+export function ResetButton({ children, open: openProp, onOpenChange, tooltip, ...buttonProps }: Props) {
   const { resetDraw } = useDraw();
   const [openState, setOpenState] = useState(false);
   const open = openProp ?? openState;
   const setOpen = onOpenChange ?? setOpenState;
 
+  const trigger = (
+    <Button onClick={() => setOpen(true)} {...buttonProps}>
+      {children}
+    </Button>
+  );
+
   return (
     <>
-      <Button onClick={() => setOpen(true)} {...buttonProps}>
-        {children}
-      </Button>
+      {tooltip ? (
+        <Tooltip>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        trigger
+      )}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

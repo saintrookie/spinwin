@@ -78,6 +78,12 @@ export function DrawStage() {
   }, [status, isStopping, rollPool, rollSpeedMs, rollDurationMs, soundEnabled]);
 
   useEffect(() => {
+    if (status !== "rolling") {
+      setRollingDisplay(null);
+    }
+  }, [status]);
+
+  useEffect(() => {
     if ((status === "revealing" || status === "celebrating") && lastWinner) {
       if (confettiFiredForRef.current !== lastWinner.winnerId) {
         confettiFiredForRef.current = lastWinner.winnerId;
@@ -116,13 +122,13 @@ export function DrawStage() {
           {isRevealed ? "Pemenang" : isRolling ? "Pengundian Berjalan..." : "Ready"}
         </div>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={display?.key ?? "empty"}
-            initial={reduceMotion ? false : { opacity: 0, y: isRolling ? 8 : 24, scale: isRevealed ? 0.9 : 1 }}
+            initial={reduceMotion ? false : isRolling ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: isRolling ? -8 : -12 }}
-            transition={{ duration: reduceMotion ? 0 : isRolling ? 0.05 : 0.4, ease: "easeOut" }}
+            exit={reduceMotion ? undefined : isRolling ? { opacity: 0 } : { opacity: 0, y: -12 }}
+            transition={{ duration: reduceMotion ? 0 : isRolling ? 0.08 : 0.4, ease: "easeOut" }}
             className={cn(
               "flex items-center justify-center gap-3 font-mono font-extrabold leading-tight tracking-widest text-foreground sm:gap-4",
               "text-[clamp(2.25rem,11vw,8rem)]",

@@ -18,7 +18,7 @@ export function useKeyboardShortcuts(shortcuts: ShortcutMap, enabled = true) {
       const target = event.target as HTMLElement | null;
       if (target && (EDITABLE_TAGS.has(target.tagName) || target.isContentEditable)) return;
 
-      const key = event.code === "Space" ? "Space" : event.key.toLowerCase();
+      const key = event.code === "Space" ? "space" : event.key.toLowerCase();
       const fn = shortcuts[key];
       if (fn) {
         event.preventDefault();

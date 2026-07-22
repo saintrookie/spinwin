@@ -1,15 +1,29 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { PartyPopper, Car, ArrowRight, X } from "lucide-react";
+import { PartyPopper, Car, X } from "lucide-react";
 import { useDraw } from "@/context/draw-context";
 import { Button } from "@/components/ui/button";
 import { maskFullName } from "@/lib/mask-name";
 
 export function WinnerModal() {
-  const { state, currentPrize, returnToIdle } = useDraw();
-  const { status, lastWinner } = state;
+  const { state, returnToIdle } = useDraw();
+  const { status, lastWinner, lastWinnerPrizeName } = state;
   const open = (status === "revealing" || status === "celebrating") && Boolean(lastWinner);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") returnToIdle();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, returnToIdle]);
 
   return (
     <AnimatePresence>
@@ -31,6 +45,7 @@ export function WinnerModal() {
             className="retro-card relative w-full max-w-xl border-primary p-10 text-center"
           >
             <Button
+              ref={closeButtonRef}
               variant="ghost"
               size="icon"
               className="absolute right-3 top-3"
@@ -45,7 +60,7 @@ export function WinnerModal() {
             </div>
 
             <p className="mb-1 text-sm font-bold uppercase tracking-[0.3em] text-primary">
-              {currentPrize?.name ?? "Winner"}
+              {lastWinnerPrizeName ?? "Winner"}
             </p>
             <h2 className="text-[clamp(2rem,5vw,3.5rem)] font-extrabold leading-tight text-foreground">
               {maskFullName(lastWinner.fullName)}
@@ -63,7 +78,6 @@ export function WinnerModal() {
               <Button variant="secondary" onClick={returnToIdle}>
                 Continue
               </Button>
-              
             </div>
           </motion.div>
         </motion.div>

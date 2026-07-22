@@ -33,6 +33,7 @@ type DrawState = {
   history: Winner[];
   rollPool: RollCandidate[];
   lastWinner: SpinResult | null;
+  lastWinnerPrizeName: string | null;
   loading: boolean;
 };
 
@@ -45,7 +46,7 @@ type Action =
   | { type: "SET_SETTINGS"; settings: DrawSettings }
   | { type: "SET_HISTORY"; history: Winner[] }
   | { type: "SET_ROLL_POOL"; rollPool: RollCandidate[] }
-  | { type: "SET_WINNER"; winner: SpinResult | null };
+  | { type: "SET_WINNER"; winner: SpinResult | null; prizeName?: string | null };
 
 const initialState: DrawState = {
   status: "idle",
@@ -56,6 +57,7 @@ const initialState: DrawState = {
   history: [],
   rollPool: [],
   lastWinner: null,
+  lastWinnerPrizeName: null,
   loading: true,
 };
 
@@ -78,7 +80,11 @@ function reducer(state: DrawState, action: Action): DrawState {
     case "SET_ROLL_POOL":
       return { ...state, rollPool: action.rollPool };
     case "SET_WINNER":
-      return { ...state, lastWinner: action.winner };
+      return {
+        ...state,
+        lastWinner: action.winner,
+        lastWinnerPrizeName: action.winner ? action.prizeName ?? null : null,
+      };
     default:
       return state;
   }
@@ -166,6 +172,7 @@ export function DrawProvider({ children }: { children: ReactNode }) {
     if (state.status !== "rolling" || state.isStopping || !currentPrize) return;
     dispatch({ type: "SET_STOPPING", isStopping: true });
     const rollDurationMs = state.settings?.rollDurationMs ?? 4000;
+    const wonPrizeName = currentPrize.name;
     try {
       const [results] = await Promise.all([
         api.spin(currentPrize.id, 1),
@@ -177,7 +184,7 @@ export function DrawProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_STOPPING", isStopping: false });
         return;
       }
-      dispatch({ type: "SET_WINNER", winner: results[0] });
+      dispatch({ type: "SET_WINNER", winner: results[0], prizeName: wonPrizeName });
       dispatch({ type: "SET_STATUS", status: "revealing" });
       await Promise.all([refreshStats(), refreshHistory(), refreshRollPool(), refreshPrizes()]);
     } catch (err) {
