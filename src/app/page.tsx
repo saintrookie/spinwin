@@ -56,14 +56,14 @@ export default function Home() {
           <header className="flex flex-col items-center gap-2 px-4 pt-2">
             <div className="relative flex w-full flex-col items-center justify-center gap-1 lg:min-h-32 lg:flex-row lg:gap-0">
               <div className="static flex items-center justify-center gap-2 sm:gap-3 lg:absolute lg:left-4 lg:top-1/2 lg:-translate-y-1/2 lg:gap-4">
-                {logoFiles.map((file, i) => (
+                {logoFiles.map((file) => (
                   <div
                     key={file}
                     className={cn(
                       "flex items-center justify-center",
-                      i < 2
-                        ? "h-12 w-12 sm:h-14 sm:w-14 lg:h-[3.96rem] lg:w-[3.96rem] xl:h-[6.34rem] xl:w-[6.34rem]"
-                        : "h-[3.6rem] w-[3.6rem] sm:h-[4.2rem] sm:w-[4.2rem] lg:h-24 lg:w-24 xl:h-[9.6rem] xl:w-[9.6rem]"
+                      file === "3.png"
+                        ? "h-[4.59rem] w-[4.59rem] sm:h-[5.51rem] sm:w-[5.51rem] lg:h-[7.34rem] lg:w-[7.34rem] xl:h-[9.18rem] xl:w-[9.18rem]"
+                        : "h-12 w-12 sm:h-[3.6rem] sm:w-[3.6rem] lg:h-[4.8rem] lg:w-[4.8rem] xl:h-24 xl:w-24"
                     )}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element -- dynamic folder listing, dimensions unknown ahead of time */}
