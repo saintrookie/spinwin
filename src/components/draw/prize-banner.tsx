@@ -13,14 +13,6 @@ export function PrizeBanner() {
       {currentPrize ? (
         <>
           <span className="font-extrabold">{currentPrize.name}</span>
-          {currentPrize.description && (
-            <span className="hidden text-sm font-medium opacity-80 sm:inline">
-              — {currentPrize.description}
-            </span>
-          )}
-          <Badge className="border-2 border-foreground bg-card text-card-foreground">
-            {currentPrize.awardedCount}/{currentPrize.quantity} hadiah
-          </Badge>
         </>
       ) : (
         <span className="text-sm font-medium">Tidak ada pilihan hadiah</span>
