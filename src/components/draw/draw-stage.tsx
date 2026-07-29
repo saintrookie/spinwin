@@ -152,6 +152,11 @@ export function DrawStage() {
               transition={{ duration: reduceMotion ? 0 : 0.4, delay: reduceMotion ? 0 : 0.15, ease: "easeOut" }}
               className="mt-4 flex flex-col items-center gap-1 sm:mt-6"
             >
+               
+                <span className="text-xs font-bold uppercase tracking-[0.25em] text-muted-foreground sm:text-sm">
+                  Nama Pemenang
+                </span>
+              
               <span className="text-[clamp(1.25rem,4vw,2rem)] font-extrabold text-foreground">
                 {maskFullName(lastWinner.fullName)}
               </span>
