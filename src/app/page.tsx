@@ -48,7 +48,7 @@ export default function Home() {
           alt="Tim Pembina Samsat Bangka Belitung"
           width={1533}
           height={1042}
-          className="floating-card pointer-events-none absolute right-3 bottom-28 z-20 hidden w-[16.56rem] drop-shadow-xl sm:block lg:bottom-3 lg:w-[22.08rem]"
+          className="floating-card pointer-events-none absolute right-3 bottom-28 z-20 hidden w-[18.63rem] drop-shadow-xl sm:block lg:bottom-3 lg:w-[24.84rem]"
         />
 
         {/* Content */}
